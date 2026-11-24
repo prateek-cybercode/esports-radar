@@ -1,0 +1,1 @@
+ESPORTS RADAR v2. Replace repository files with these files and commit to main. Game buttons now change the search queries and city selector. Search links launch live web searches; they do not guarantee verified or open events. Saved events are local. Notifications only work while the app is open; true background push requires a backend.
