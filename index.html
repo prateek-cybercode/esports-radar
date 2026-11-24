@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#11111b"><link rel="manifest" href="manifest.webmanifest">
+<title>ESPORTS RADAR</title><style>
+:root{color-scheme:dark;--bg:#0b0b12;--panel:#171724;--muted:#a4a4b8;--accent:#9b7cff;--line:#303044}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 85% 0,#272044 0,transparent 35%),var(--bg);color:#f6f4ff;font:15px system-ui,Arial}
+main{max-width:760px;margin:auto;padding:18px}.top{display:flex;justify-content:space-between;align-items:center;gap:10px}.logo{font-weight:900;letter-spacing:1.5px;font-size:19px}.pill{font-size:11px;color:#b9ffda;border:1px solid #28654c;border-radius:20px;padding:5px 9px}
+h1{font-size:32px;line-height:1.1;margin:25px 0 8px}.sub,.muted{color:var(--muted)}.hero{background:linear-gradient(130deg,#21183b,#151525 65%);border:1px solid #3a3156;border-radius:20px;padding:20px;margin:18px 0}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.stat,.card,.panel{background:var(--panel);border:1px solid var(--line);border-radius:15px;padding:13px}.stat b{display:block;font-size:20px}
+h2{font-size:18px;margin:22px 0 10px}.chips{display:flex;flex-wrap:wrap;gap:8px}.chip{background:#222235;border:1px solid #41415b;color:#eee;border-radius:22px;padding:8px 12px;cursor:pointer}.chip.active{background:#392d60;border-color:var(--accent)}
+button,a.btn{border:0;border-radius:11px;background:var(--accent);color:white;padding:11px 14px;font-weight:700;text-decoration:none;cursor:pointer;display:inline-block}button.secondary,a.secondary{background:#29293b;border:1px solid #41415b}
+input,select{background:#0f0f18;color:white;border:1px solid #41415b;border-radius:10px;padding:11px;width:100%;margin:5px 0 10px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:9px}.source{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--line)}.source:last-child{border:0}
+.small{font-size:12px;color:var(--muted)}.tag{font-size:11px;color:#d6caff;background:#30274a;padding:4px 7px;border-radius:8px}
+.event{margin:9px 0}.event h3{margin:0 0 5px;font-size:15px}.event p{margin:4px 0;color:var(--muted);font-size:13px}
+footer{color:var(--muted);font-size:12px;padding:25px 0}.hide{display:none}
+</style></head>
+<body><main>
+<div class="top"><div class="logo">◈ ESPORTS RADAR</div><span class="pill">BENGALURU FIRST</span></div>
+<section class="hero"><div class="small">YOUR PERSONAL TOURNAMENT SCOUT</div><h1>Don't miss the<br>next registration.</h1><p class="sub">Track esports sources, save events and get deadline reminders. Free to use.</p><div class="stats"><div class="stat"><b id="savedCount">0</b><span class="small">Saved events</span></div><div class="stat"><b>5+</b><span class="small">Game categories</span></div><div class="stat"><b>₹0</b><span class="small">App cost</span></div></div></section>
+<h2>1. Choose your games</h2><div class="chips" id="games"></div>
+<h2>2. Find tournaments</h2><p class="muted small">These are discovery sources, not a guarantee that every listing is local or verified. Check organiser details before paying or sharing information.</p>
+<div class="panel" id="sources"></div>
+<h2>3. Your saved events & reminders</h2>
+<div class="panel"><label class="small">Event name</label><input id="eventName" placeholder="e.g. Bengaluru CODM College Cup"><div class="row"><div><label class="small">Game</label><select id="eventGame"><option>CODM</option><option>BGMI</option><option>Valorant</option><option>Free Fire</option><option>Other esports</option></select></div><div><label class="small">Registration deadline</label><input id="deadline" type="datetime-local"></div></div><label class="small">Registration / event link</label><input id="eventLink" type="url" placeholder="https://..."><button id="saveEvent">Save event</button> <button class="secondary" id="notify">Enable notifications</button><p class="small" id="status">Notifications work while this app is open. Background alerts need a push server.</p></div>
+<div id="eventList"></div>
+<footer>ESPORTS RADAR is an independent tracker, not affiliated with game publishers or tournament organisers. Always verify event dates, eligibility, entry fees and registration status on the organiser's official page. Never pay an unknown organiser without verification.</footer>
+</main>
+<script>
+const gameList=["CODM","BGMI","Valorant","Free Fire","Other esports"];
+const sources=[
+["India.gg Esports","India-wide event calendar; useful for major competitions.","https://india.gg/esports/"],
+["Hash for Gamers","Mobile and PC tournaments; check in-app city filters.","https://www.hashforgamers.com/tournaments"],
+["Pras Esports","CODM, BGMI, Free Fire, Valorant and other titles.","https://www.prasesports.in/"],
+["ArenaX","Tournament listings and team-finder across multiple games.","https://arenax.io/"],
+["Espotz","Tournament listings; inspect registration dates and slots.","https://www.espotz.live/tournaments"],
+["KRAFTON India Esports","Official BGMI competition announcements.","https://kraftonindiaesports.com/"],
+["Google search: Bengaluru CODM tournaments","Find newly announced local college fests and LAN events.","https://www.google.com/search?q=Bengaluru+CODM+esports+tournament+registration"],
+["Google search: Bengaluru college esports fest","Catch campus events before registration closes.","https://www.google.com/search?q=Bengaluru+college+esports+fest+registration+2026"]
+];
+let selected=new Set(gameList), events=JSON.parse(localStorage.getItem("er-events")||"[]");
+const $=id=>document.getElementById(id);
+gameList.forEach(g=>{let b=document.createElement("button");b.className="chip active";b.textContent=g;b.onclick=()=>{selected.has(g)?selected.delete(g):selected.add(g);b.classList.toggle("active")};$("games").append(b)});
+sources.forEach(s=>{let d=document.createElement("div");d.className="source";d.innerHTML=`<div><b>${s[0]}</b><div class="small">${s[1]}</div></div><a class="btn secondary" target="_blank" rel="noopener" href="${s[2]}">Open ↗</a>`;$("sources").append(d)});
+function render(){ $("savedCount").textContent=events.length;$("eventList").innerHTML="";events.forEach((e,i)=>{let d=document.createElement("div");d.className="card event";d.innerHTML=`<span class="tag">${e.game}</span><h3>${escapeHtml(e.name)}</h3><p>Deadline: ${new Date(e.deadline).toLocaleString()}</p><div class="small">${e.link?`<a target="_blank" rel="noopener" href="${safeUrl(e.link)}">Registration link ↗</a>`:"No link added"}</div><p><button class="secondary" data-del="${i}">Remove</button></p>`;$("eventList").append(d)});document.querySelectorAll("[data-del]").forEach(b=>b.onclick=()=>{events.splice(+b.dataset.del,1);persist()})}
+function escapeHtml(s){return s.replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+function safeUrl(u){try{let x=new URL(u);return ["http:","https:"].includes(x.protocol)?x.href:"#"}catch{return "#"}}
+function persist(){localStorage.setItem("er-events",JSON.stringify(events));render()}
+$("saveEvent").onclick=()=>{let name=$("eventName").value.trim(),deadline=$("deadline").value,game=$("eventGame").value,link=$("eventLink").value.trim();if(!name||!deadline){$("status").textContent="Add an event name and registration deadline first.";return}events.push({name,deadline,game,link});persist();$("eventName").value="";$("eventLink").value="";$("status").textContent="Saved. Keep the app open to receive deadline reminders."};
+$("notify").onclick=async()=>{if(!("Notification"in window)){$("status").textContent="This browser does not support notifications.";return}let p=await Notification.requestPermission();$("status").textContent=p==="granted"?"Notifications enabled. Keep this app open for reminders.":"Notification permission was not granted."};
+function checkDeadlines(){if(!("Notification"in window)||Notification.permission!=="granted")return;let now=Date.now();events.forEach(e=>{let t=new Date(e.deadline).getTime(),key="er-notified-"+e.name+"-"+e.deadline;if(t-now>0&&t-now<24*60*60*1000&&!localStorage.getItem(key)){new Notification("Registration closing soon",{body:e.name+" • "+e.game+" • deadline within 24 hours"});localStorage.setItem(key,"1")}})}
+if("serviceWorker"in navigator)navigator.serviceWorker.register("./sw.js").catch(()=>{});render();checkDeadlines();setInterval(checkDeadlines,60000);
+</script></body></html>
